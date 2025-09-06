@@ -1,0 +1,26 @@
+{
+    "HP": {
+        "enabled": true,
+        "key": "1",
+        "threshold": 80,
+        "cooldown": 2.8,
+        "post_use_delay": 0.5,
+		"note": "HP Flask. Triggers when life is at or below 80%. Uses key '1'. After pressing, waits 0.5s before checking again. Cooldown 2.8s (matches flask recovery duration)."
+    },
+    "MP": {
+        "enabled": true,
+        "key": "2",
+        "threshold": 20,
+        "cooldown": 3.5,
+        "post_use_delay": 0.3,
+		"note": "Mana Flask. Triggers when mana is at or below 20%. Uses key '2'. After pressing, waits 0.3s before checking again. Cooldown 3.5s (matches flask recovery duration)."
+    },
+    "ES": {
+        "enabled": true,
+        "key": "E",
+        "threshold": 30,
+        "cooldown": 23,
+        "post_use_delay": 0.0,
+		"note": "ES Recovery Skill. Triggers when energy shield is at or below 30%. Uses key 'E'. No extra delay after pressing. Cooldown 23s (skill cooldown)."
+    }
+}
