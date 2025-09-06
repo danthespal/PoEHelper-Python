@@ -71,16 +71,6 @@ async def wait_for_memory(pm, base_address, offsets, retry_delay=1.0):
             await asyncio.sleep(retry_delay)
 
 # -------------------------
-# Extra Condition for HP
-# -------------------------
-def hp_extra_condition(pm):
-    try:
-        cures_address = get_final_address(pm, base_address, offsets["CurES"])
-        return pm.read_int(cures_address) == 0
-    except:
-        return True
-
-# -------------------------
 # Extra Condition for ES
 # -------------------------
 def es_extra_condition(pm):
@@ -99,8 +89,8 @@ async def stat_routine(pm, handle, name, offsets, extra_condition=None):
         return
     key = config[name]["key"]
     threshold = config[name]["threshold"]
-    cooldown = float(config[name]["cooldown"])
-    post_use_delay = float(config[name].get("post_use_delay", 0.0))
+    cooldown = config[name]["cooldown"]
+    post_use_delay = config[name].get("post_use_delay", 0.0)
     last_used = 0
     search_last_msg = 0
     memory_was_invalid = False
@@ -188,7 +178,7 @@ async def main():
     # Start routines
     async with asyncio.TaskGroup() as tg:
         print("PoEHelper is ON")
-        tg.create_task(stat_routine(pm, handle, "HP", offsets, extra_condition=hp_extra_condition))
+        tg.create_task(stat_routine(pm, handle, "HP", offsets))
         tg.create_task(stat_routine(pm, handle, "MP", offsets))
         tg.create_task(stat_routine(pm, handle, "ES", offsets, extra_condition=es_extra_condition))
 
