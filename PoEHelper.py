@@ -36,9 +36,9 @@ def get_final_address(pm: Pymem, base_address: int, offsets: list[int]) -> int:
     return addr + offsets[-1]
 
 # -------------------------
-# Wait for memory
+# Async Wait for memory
 # -------------------------
-def wait_for_memory(pm, base_address, offsets, retry_delay=1.0):
+async def wait_for_memory(pm, base_address, offsets, retry_delay=1.0):
     last_msg_time = 0
     while True:
         try:
@@ -68,7 +68,7 @@ def wait_for_memory(pm, base_address, offsets, retry_delay=1.0):
             if now - last_msg_time >= 10:
                 print("PoEHelper: Searching for memory offsets...")
                 last_msg_time = now
-            time.sleep(retry_delay)
+            await asyncio.sleep(retry_delay)
 
 # -------------------------
 # Extra Condition for HP
@@ -121,16 +121,16 @@ async def stat_routine(pm, handle, name, offsets, extra_condition=None):
             memory_ever_valid = True
 
             # Check thresholds and extra condition
-            if percent := (current_val / max_val) * 100 if max_val != 0 else 0:
-                now = time.time()
-                if percent <= threshold and (extra_condition is None or extra_condition(pm)) and (now - last_used) >= cooldown:
-                    win32api.PostMessage(handle, win32con.WM_KEYDOWN, ord(key.upper()), 0)
-                    win32api.PostMessage(handle, win32con.WM_KEYUP, ord(key.upper()), 0)
-                    last_used = now
-                    print(f"[{time.strftime('%H:%M:%S')}]: Used {name} key {key} (CD {cooldown}s)")
+            percent = (current_val / max_val) * 100 if max_val != 0 else 0
+            now = time.time()
+            if percent <= threshold and (extra_condition is None or extra_condition(pm)) and (now - last_used) >= cooldown:
+                win32api.PostMessage(handle, win32con.WM_KEYDOWN, ord(key.upper()), 0)
+                win32api.PostMessage(handle, win32con.WM_KEYUP, ord(key.upper()), 0)
+                last_used = now
+                print(f"[{time.strftime('%H:%M:%S')}]: Used {name} key {key} (CD {cooldown}s)")
 
-                    if post_use_delay > 0:
-                        await asyncio.sleep(post_use_delay)
+                if post_use_delay > 0:
+                    await asyncio.sleep(post_use_delay)
 
             await asyncio.sleep(0.2)
 
@@ -162,7 +162,7 @@ async def main():
         handle = win32gui.FindWindow(None, window_name)
         if handle == 0:
             print("Waiting for game window...")
-            time.sleep(1)
+            await asyncio.sleep(1)
 
     # Wait for process
     pm = None
@@ -176,14 +176,14 @@ async def main():
                 pm = None
         if pm is None:
             print("Waiting for game process...")
-            time.sleep(1)
+            await asyncio.sleep(1)
 
     global base_address
     base_address = pm.base_address + base_offset
     print(f"Attached to {process_name} | Window: {window_name}")
 
     # Wait until memory is ready
-    wait_for_memory(pm, base_address, offsets)
+    await wait_for_memory(pm, base_address, offsets)
 
     # Start routines
     async with asyncio.TaskGroup() as tg:
